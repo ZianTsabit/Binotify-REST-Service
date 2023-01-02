@@ -1,0 +1,35 @@
+version: '3.8'
+
+services: 
+  node_db: 
+    container_name: node_db
+    image: "postgres:12"
+    build: ./db
+    ports:
+      - "5434:5432"
+    environment: 
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=binotify_rest_db
+    volumes:
+      - nps_data:/var/lib/postgresql/data
+    restart: always
+  node_backend:
+    container_name: binotify-rest-service
+    image: binotify-rest-service:0.0.4
+    build: 
+      context: .
+    ports:
+      - "3001:3001"
+    environment: 
+      - EXTERNAL_PORT=3001
+      - PGDATABASE=binotify_rest_db
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGHOST=node_db
+    depends_on: 
+      - node_db
+    restart: always
+
+volumes:
+  nps_data: {}
